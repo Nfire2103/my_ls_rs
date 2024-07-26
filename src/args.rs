@@ -68,13 +68,15 @@ fn retrieve_small_options(arg: Chars, options: &mut [bool; NBR_OPTIONS]) {
     }
 }
 
-pub fn parse() -> [bool; NBR_OPTIONS] {
+pub fn parse() -> ([bool; NBR_OPTIONS], Vec<String>) {
     let mut options = [false; NBR_OPTIONS];
+    let mut paths = Vec::new();
 
     for arg in env::args().skip(1) {
         let (Some(first_char), Some(second_char)) =
             (arg.chars().nth(0), arg.chars().nth(1))
         else {
+            paths.push(arg);
             continue;
         };
 
@@ -82,8 +84,10 @@ pub fn parse() -> [bool; NBR_OPTIONS] {
             retrieve_big_option(&arg, &mut options);
         } else if first_char == '-' {
             retrieve_small_options(arg.chars(), &mut options);
+        } else {
+            paths.push(arg);
         }
     }
 
-    options
+    (options, paths)
 }
