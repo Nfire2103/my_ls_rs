@@ -1,3 +1,6 @@
+mod args;
+
 fn main() {
-    println!("Hello, world!");
+    let options = args::parse();
+    println!("{options:?}");
 }
