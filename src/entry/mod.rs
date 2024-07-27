@@ -2,6 +2,8 @@ mod file;
 mod folder;
 mod sort;
 
+use super::args::ALL;
+use super::args::NBR_OPTIONS;
 use file::File;
 use folder::Folder;
 use sort::sort_entries;
@@ -33,7 +35,10 @@ fn display_error_at_open(path: &str, err: Error) {
     );
 }
 
-pub fn load_entries(paths: Vec<String>) -> (Vec<File>, Vec<Folder>) {
+pub fn load_entries(
+    options: &[bool; NBR_OPTIONS],
+    paths: Vec<String>,
+) -> (Vec<File>, Vec<Folder>) {
     let mut files = Vec::new();
     let mut folders = Vec::new();
 
@@ -45,7 +50,7 @@ pub fn load_entries(paths: Vec<String>) -> (Vec<File>, Vec<Folder>) {
         }
 
         if entry.is_dir() {
-            let folder_result = Folder::new(&path, true)
+            let folder_result = Folder::new(&path, true, options[ALL])
                 .map_err(|err| display_error_at_open(&path, err));
 
             if let Ok(folder) = folder_result {

@@ -10,7 +10,10 @@ pub struct Folder {
     entries: Vec<Box<dyn Entry>>,
 }
 
-fn load_sub_entries(paths: Vec<PathBuf>) -> Vec<Box<dyn Entry>> {
+fn load_sub_entries(
+    paths: Vec<PathBuf>,
+    display_all: bool,
+) -> Vec<Box<dyn Entry>> {
     let mut entries: Vec<Box<dyn Entry>> = Vec::new();
 
     for path in paths {
@@ -23,12 +26,12 @@ fn load_sub_entries(paths: Vec<PathBuf>) -> Vec<Box<dyn Entry>> {
         let Some(file_name) = os_name.to_str() else {
             continue;
         };
-        if file_name.starts_with('.') {
+        if file_name.starts_with('.') && !display_all {
             continue;
         }
 
         if path.is_dir() {
-            let folder_result = Folder::new(file_name, false)
+            let folder_result = Folder::new(file_name, false, display_all)
                 .map_err(|err| display_error_at_open(path_str, err));
 
             if let Ok(folder) = folder_result {
@@ -39,14 +42,24 @@ fn load_sub_entries(paths: Vec<PathBuf>) -> Vec<Box<dyn Entry>> {
         }
     }
 
+    if display_all {
+        entries.push(Box::new(Folder::new(".", false, display_all).unwrap()));
+        entries.push(Box::new(Folder::new("..", false, display_all).unwrap()));
+    }
+
     sort_sub_entries(&mut entries);
 
     entries
 }
 
 impl Folder {
-    pub fn new(path: &str, open_dir: bool) -> Result<Self, Error> {
+    pub fn new(
+        path: &str,
+        open_dir: bool,
+        display_all: bool,
+    ) -> Result<Self, Error> {
         let mut sub_paths = Vec::new();
+        let mut entries = Vec::new();
 
         if open_dir {
             let mut read_dir = read_dir(path)?;
@@ -54,11 +67,13 @@ impl Folder {
             while let Some(Ok(entry)) = read_dir.next() {
                 sub_paths.push(entry.path());
             }
+
+            entries = load_sub_entries(sub_paths, display_all);
         }
 
         Ok(Self {
             name: path.to_string(),
-            entries: load_sub_entries(sub_paths),
+            entries,
         })
     }
 

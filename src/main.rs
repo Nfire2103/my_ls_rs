@@ -13,7 +13,7 @@ macro_rules! printlnif {
 
 fn main() {
     let parse_result = args::parse();
-    let entries = load_entries(parse_result.1);
+    let entries = load_entries(&parse_result.0, parse_result.1);
     let nbr_files = entries.0.len();
     let nbr_folders = entries.1.len();
     let nbr_entries = nbr_files + nbr_folders;
