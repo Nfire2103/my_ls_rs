@@ -3,6 +3,7 @@ mod folder;
 mod sort;
 
 use super::args::ALL;
+use super::args::DIRECTORY;
 use super::args::NBR_OPTIONS;
 use file::File;
 use folder::Folder;
@@ -49,7 +50,7 @@ pub fn load_entries(
             continue;
         }
 
-        if entry.is_dir() {
+        if entry.is_dir() && !options[DIRECTORY] {
             let folder_result = Folder::new(&path, true, options[ALL])
                 .map_err(|err| display_error_at_open(&path, err));
 
