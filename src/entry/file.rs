@@ -14,4 +14,8 @@ impl Entry for File {
     fn display(&self) {
         print!("{}  ", self.name);
     }
+
+    fn get_name(&self) -> &String {
+        return &self.name;
+    }
 }

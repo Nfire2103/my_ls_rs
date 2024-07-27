@@ -1,14 +1,17 @@
 mod file;
 mod folder;
+mod sort;
 
 use file::File;
 use folder::Folder;
+use sort::sort_entries;
 use std::env;
 use std::io::Error;
 use std::path::PathBuf;
 
 pub trait Entry {
     fn display(&self);
+    fn get_name(&self) -> &String;
 }
 
 fn display_no_such_file(path: &str) {
@@ -52,6 +55,9 @@ pub fn load_entries(paths: Vec<String>) -> (Vec<File>, Vec<Folder>) {
             files.push(File::new(path));
         }
     }
+
+    sort_entries(&mut files);
+    sort_entries(&mut folders);
 
     (files, folders)
 }

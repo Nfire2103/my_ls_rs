@@ -1,4 +1,5 @@
 use super::file::File;
+use super::sort::sort_sub_entries;
 use super::{display_error_at_open, Entry};
 use std::fs::read_dir;
 use std::io::Error;
@@ -38,6 +39,8 @@ fn load_sub_entries(paths: Vec<PathBuf>) -> Vec<Box<dyn Entry>> {
         }
     }
 
+    sort_sub_entries(&mut entries);
+
     entries
 }
 
@@ -73,5 +76,9 @@ impl Folder {
 impl Entry for Folder {
     fn display(&self) {
         print!("{}  ", self.name);
+    }
+
+    fn get_name(&self) -> &String {
+        return &self.name;
     }
 }
