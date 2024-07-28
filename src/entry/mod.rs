@@ -26,7 +26,7 @@ pub trait Entry {
 fn display_no_such_file(path_str: &str) {
     println!(
         "{}: cannot access \'{}\': No such file or directory",
-        env::args().nth(0).unwrap(),
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string()),
         path_str
     );
 }
@@ -36,7 +36,7 @@ fn display_error_at_open(path_str: &str, err: Error) {
 
     println!(
         "{}: cannot open directory \'{}\': {}",
-        env::args().nth(0).unwrap(),
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string()),
         path_str,
         format!("{}{}", err_kind.remove(0).to_uppercase(), err_kind)
     );

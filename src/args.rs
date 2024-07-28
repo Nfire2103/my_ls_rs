@@ -17,7 +17,7 @@ pub struct ParseRes {
 fn display_help() {
     println!(
         "Usage: {} [OPTION]... [FILE]...",
-        env::args().nth(0).unwrap()
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string())
     );
     println!(
         "List information about the FILEs (the current directory by default)."
@@ -28,12 +28,12 @@ fn display_help() {
 fn exit_bad_big_option(option_str: &str) {
     println!(
         "{}: unrecognized option \'{}\'",
-        env::args().nth(0).unwrap(),
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string()),
         option_str
     );
     println!(
         "Try \'{} --help\' for more information.",
-        env::args().nth(0).unwrap()
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string())
     );
     process::exit(2);
 }
@@ -48,12 +48,12 @@ fn retrieve_big_option(arg: &str, _: &mut [bool; NBR_OPTIONS]) {
 fn exit_bad_small_option(option_c: char) {
     println!(
         "{}: option requires an argument -- \'{}\'",
-        env::args().nth(0).unwrap(),
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string()),
         option_c
     );
     println!(
         "Try \'{} --help\' for more information.",
-        env::args().nth(0).unwrap()
+        env::args().nth(0).unwrap_or("my_ls_rs".to_string())
     );
     process::exit(2);
 }
