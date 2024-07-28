@@ -5,9 +5,9 @@ pub struct File {
 }
 
 impl File {
-    pub fn new(path: &str) -> Self {
+    pub fn new(path_str: &str) -> Self {
         Self {
-            name: path.to_string(),
+            name: path_str.to_string(),
         }
     }
 }

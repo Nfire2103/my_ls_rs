@@ -22,10 +22,10 @@ fn load_sub_entries(
         let Some(path_str) = path.to_str() else {
             continue;
         };
-        let Some(os_name) = path.file_name() else {
+        let Some(os_file_name) = path.file_name() else {
             continue;
         };
-        let Some(file_name) = os_name.to_str() else {
+        let Some(file_name) = os_file_name.to_str() else {
             continue;
         };
         if file_name.starts_with('.') && !display_all {
@@ -58,19 +58,19 @@ fn load_sub_entries(
 
 impl Folder {
     pub fn new(
-        path: &str,
+        path_str: &str,
         display_all: bool,
         open_sub_dirs: bool,
     ) -> Result<Self, Error> {
         let mut sub_paths = Vec::new();
-        let mut read_dir = read_dir(path)?;
+        let mut read_dir = read_dir(path_str)?;
 
-        while let Some(Ok(entry)) = read_dir.next() {
-            sub_paths.push(entry.path());
+        while let Some(Ok(dir_entry)) = read_dir.next() {
+            sub_paths.push(dir_entry.path());
         }
 
         Ok(Self {
-            path_str: path.to_string(),
+            path_str: path_str.to_string(),
             entries: load_sub_entries(sub_paths, display_all, open_sub_dirs),
         })
     }
@@ -78,16 +78,16 @@ impl Folder {
 
 impl Entry for Folder {
     fn display(&self) {
-        for entry in &self.entries.files {
-            entry.display();
+        for file in &self.entries.files {
+            file.display();
         }
         if self.entries.files.len() > 0 {
             println!();
         }
 
-        for entry in &self.entries.folders {
-            println!("\n{}:", entry.path_str);
-            entry.display();
+        for folder in &self.entries.folders {
+            println!("\n{}:", folder.path_str);
+            folder.display();
         }
     }
 

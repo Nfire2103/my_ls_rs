@@ -12,23 +12,24 @@ macro_rules! printlnif {
 }
 
 fn main() {
-    let parse_result = args::parse();
-    let entries = load_entries(&parse_result.0, parse_result.1);
+    let parse_res = args::parse();
+
+    let entries = load_entries(parse_res.options, parse_res.paths_str);
     let nbr_files = entries.files.len();
     let nbr_folders = entries.folders.len();
     let nbr_entries = nbr_files + nbr_folders;
 
-    for entry in entries.files {
-        entry.display();
+    for file in entries.files {
+        file.display();
     }
     printlnif!(nbr_files > 0);
     printlnif!(nbr_files > 0 && nbr_folders > 0);
 
-    for (i, entry) in entries.folders.iter().enumerate() {
+    for (i, folder) in entries.folders.iter().enumerate() {
         if nbr_entries > 1 {
-            println!("{}:", entry.get_name());
+            println!("{}:", folder.get_name());
         }
-        entry.display();
+        folder.display();
         printlnif!(i != nbr_folders - 1);
     }
 }

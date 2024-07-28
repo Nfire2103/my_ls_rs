@@ -1,6 +1,5 @@
 use std::env;
 use std::process;
-use std::str::Chars;
 
 pub const ALL: usize = 0;
 pub const LISTING: usize = 1;
@@ -9,6 +8,11 @@ pub const DIRECTORY: usize = 3;
 pub const REVERSE: usize = 4;
 pub const TIME: usize = 5;
 pub const NBR_OPTIONS: usize = 6;
+
+pub struct ParseRes {
+    pub options: [bool; NBR_OPTIONS],
+    pub paths_str: Vec<String>,
+}
 
 fn display_help() {
     println!(
@@ -21,11 +25,11 @@ fn display_help() {
     process::exit(0);
 }
 
-fn exit_bad_big_option(option: &str) {
+fn exit_bad_big_option(option_str: &str) {
     println!(
         "{}: unrecognized option \'{}\'",
         env::args().nth(0).unwrap(),
-        option
+        option_str
     );
     println!(
         "Try \'{} --help\' for more information.",
@@ -41,11 +45,11 @@ fn retrieve_big_option(arg: &str, _: &mut [bool; NBR_OPTIONS]) {
     }
 }
 
-fn exit_bad_small_option(option: char) {
+fn exit_bad_small_option(option_c: char) {
     println!(
         "{}: option requires an argument -- \'{}\'",
         env::args().nth(0).unwrap(),
-        option
+        option_c
     );
     println!(
         "Try \'{} --help\' for more information.",
@@ -54,40 +58,40 @@ fn exit_bad_small_option(option: char) {
     process::exit(2);
 }
 
-fn retrieve_small_options(arg: Chars, options: &mut [bool; NBR_OPTIONS]) {
-    for option in arg.skip(1) {
-        match option {
+fn retrieve_small_options(arg: &str, options: &mut [bool; NBR_OPTIONS]) {
+    for option_c in arg.chars().skip(1) {
+        match option_c {
             'a' => options[ALL] = true,
             'l' => options[LISTING] = true,
             'R' => options[RECURSIVE] = true,
             'd' => options[DIRECTORY] = true,
             'r' => options[REVERSE] = true,
             't' => options[TIME] = true,
-            _ => exit_bad_small_option(option),
+            _ => exit_bad_small_option(option_c),
         }
     }
 }
 
-pub fn parse() -> ([bool; NBR_OPTIONS], Vec<String>) {
+pub fn parse() -> ParseRes {
     let mut options = [false; NBR_OPTIONS];
-    let mut paths = Vec::new();
+    let mut paths_str = Vec::new();
 
     for arg in env::args().skip(1) {
         let (Some(first_char), Some(second_char)) =
             (arg.chars().nth(0), arg.chars().nth(1))
         else {
-            paths.push(arg);
+            paths_str.push(arg);
             continue;
         };
 
         if first_char == '-' && second_char == '-' {
             retrieve_big_option(&arg, &mut options);
         } else if first_char == '-' {
-            retrieve_small_options(arg.chars(), &mut options);
+            retrieve_small_options(&arg, &mut options);
         } else {
-            paths.push(arg);
+            paths_str.push(arg);
         }
     }
 
-    (options, paths)
+    ParseRes { options, paths_str }
 }
