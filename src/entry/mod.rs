@@ -12,6 +12,11 @@ use std::env;
 use std::io::Error;
 use std::path::PathBuf;
 
+pub struct Entries {
+    pub files: Vec<File>,
+    pub folders: Vec<Folder>,
+}
+
 pub trait Entry {
     fn display(&self);
     fn get_name(&self) -> &String;
@@ -39,7 +44,7 @@ fn display_error_at_open(path: &str, err: Error) {
 pub fn load_entries(
     options: &[bool; NBR_OPTIONS],
     paths: Vec<String>,
-) -> (Vec<File>, Vec<Folder>) {
+) -> Entries {
     let mut files = Vec::new();
     let mut folders = Vec::new();
 
@@ -65,5 +70,5 @@ pub fn load_entries(
     sort_entries(&mut files);
     sort_entries(&mut folders);
 
-    (files, folders)
+    Entries { files, folders }
 }

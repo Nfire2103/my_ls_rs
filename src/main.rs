@@ -14,17 +14,17 @@ macro_rules! printlnif {
 fn main() {
     let parse_result = args::parse();
     let entries = load_entries(&parse_result.0, parse_result.1);
-    let nbr_files = entries.0.len();
-    let nbr_folders = entries.1.len();
+    let nbr_files = entries.files.len();
+    let nbr_folders = entries.folders.len();
     let nbr_entries = nbr_files + nbr_folders;
 
-    for entry in entries.0 {
+    for entry in entries.files {
         entry.display();
     }
     printlnif!(nbr_files > 0);
     printlnif!(nbr_files > 0 && nbr_folders > 0);
 
-    for (i, entry) in entries.1.iter().enumerate() {
+    for (i, entry) in entries.folders.iter().enumerate() {
         if nbr_entries > 1 {
             println!("{}:", entry.name);
         }
