@@ -15,6 +15,26 @@ pub struct File {
     name: String,
 }
 
+fn format_mode(mode: u32, is_dir: bool) -> String {
+    let mut mode_str = String::new();
+
+    mode_str.push(if is_dir { 'd' } else { '-' });
+
+    mode_str.push(if mode & 0o400 != 0 { 'r' } else { '-' });
+    mode_str.push(if mode & 0o200 != 0 { 'w' } else { '-' });
+    mode_str.push(if mode & 0o100 != 0 { 'x' } else { '-' });
+
+    mode_str.push(if mode & 0o040 != 0 { 'r' } else { '-' });
+    mode_str.push(if mode & 0o020 != 0 { 'w' } else { '-' });
+    mode_str.push(if mode & 0o010 != 0 { 'x' } else { '-' });
+
+    mode_str.push(if mode & 0o004 != 0 { 'r' } else { '-' });
+    mode_str.push(if mode & 0o002 != 0 { 'w' } else { '-' });
+    mode_str.push(if mode & 0o001 != 0 { 'x' } else { '-' });
+
+    mode_str
+}
+
 fn get_owner(uid: u32, path_str: &str) -> String {
     let Some(user) = get_user_by_uid(uid) else {
         println!("{}: Failed to get the owner!", path_str);
@@ -58,7 +78,7 @@ impl File {
         let metada = metadata(path_str).unwrap();
 
         Self {
-            mode: Self::format_mode(metada.mode(), metada.is_dir()),
+            mode: format_mode(metada.mode(), metada.is_dir()),
             name: file_name.to_string(),
             nlink: metada.nlink(),
             owner: get_owner(metada.uid(), path_str),
@@ -67,26 +87,6 @@ impl File {
             blocks: metada.blocks(),
             edit: get_edit_time(metada.mtime(), path_str),
         }
-    }
-
-    fn format_mode(mode: u32, is_dir: bool) -> String {
-        let mut mode_str = String::new();
-
-        mode_str.push(if is_dir { 'd' } else { '-' });
-
-        mode_str.push(if mode & 0o400 != 0 { 'r' } else { '-' });
-        mode_str.push(if mode & 0o200 != 0 { 'w' } else { '-' });
-        mode_str.push(if mode & 0o100 != 0 { 'x' } else { '-' });
-
-        mode_str.push(if mode & 0o040 != 0 { 'r' } else { '-' });
-        mode_str.push(if mode & 0o020 != 0 { 'w' } else { '-' });
-        mode_str.push(if mode & 0o010 != 0 { 'x' } else { '-' });
-
-        mode_str.push(if mode & 0o004 != 0 { 'r' } else { '-' });
-        mode_str.push(if mode & 0o002 != 0 { 'w' } else { '-' });
-        mode_str.push(if mode & 0o001 != 0 { 'x' } else { '-' });
-
-        mode_str
     }
 }
 
