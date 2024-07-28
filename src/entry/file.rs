@@ -1,10 +1,55 @@
 use super::Entry;
+use chrono::{DateTime, Utc};
 use std::fs::metadata;
 use std::os::unix::fs::MetadataExt;
+use users::{get_group_by_gid, get_user_by_uid};
 
 pub struct File {
     mode: String,
+    nlink: u64,
+    owner: String,
+    group: String,
+    size: u64,
+    pub blocks: u64,
+    edit: String,
     name: String,
+}
+
+fn get_owner(uid: u32, path_str: &str) -> String {
+    let Some(user) = get_user_by_uid(uid) else {
+        println!("{}: Failed to get the owner!", path_str);
+        return uid.to_string();
+    };
+
+    let Some(owner) = user.name().to_str() else {
+        println!("{}: Failed to get the owner!", path_str);
+        return uid.to_string();
+    };
+
+    owner.to_string()
+}
+
+fn get_group(gid: u32, path_str: &str) -> String {
+    let Some(user) = get_group_by_gid(gid) else {
+        println!("{}: Failed to get the group!", path_str);
+        return gid.to_string();
+    };
+
+    let Some(owner) = user.name().to_str() else {
+        println!("{}: Failed to get the group!", path_str);
+        return gid.to_string();
+    };
+
+    owner.to_string()
+}
+
+fn get_edit_time(mtime: i64, path_str: &str) -> String {
+    let Some(datetime) = DateTime::<Utc>::from_timestamp(mtime, 0) else {
+        println!("{}: Failed to get the timestamp!", path_str);
+        return mtime.to_string();
+    };
+
+    datetime.format("%b %e %H:%M").to_string()
 }
 
 impl File {
@@ -15,6 +60,12 @@ impl File {
         Self {
             mode: Self::format_mode(metada.mode(), metada.is_dir()),
             name: file_name.to_string(),
+            nlink: metada.nlink(),
+            owner: get_owner(metada.uid(), path_str),
+            group: get_group(metada.gid(), path_str),
+            size: metada.size(),
+            blocks: metada.blocks(),
+            edit: get_edit_time(metada.mtime(), path_str),
         }
     }
 
@@ -42,7 +93,16 @@ impl File {
 impl Entry for File {
     fn display(&self, listing_format: bool) {
         if listing_format {
-            println!("{} {}", self.mode, self.name);
+            println!(
+                "{} {} {} {} {:>4} {} {}",
+                self.mode,
+                self.nlink,
+                self.owner,
+                self.group,
+                self.size,
+                self.edit,
+                self.name,
+            );
         } else {
             print!("{}  ", self.name);
         }

@@ -10,6 +10,10 @@ pub struct Folder {
     entries: Entries,
 }
 
+fn get_nbr_blks(files: &Vec<File>) -> u64 {
+    files.iter().map(|f| f.blocks / 2).sum()
+}
+
 fn load_sub_entries(
     paths: Vec<PathBuf>,
     dir_path_str: &str,
@@ -85,6 +89,9 @@ impl Folder {
 
 impl Entry for Folder {
     fn display(&self, listing_format: bool) {
+        if listing_format {
+            println!("total {}", get_nbr_blks(&self.entries.files));
+        }
         for file in &self.entries.files {
             file.display(listing_format);
         }
