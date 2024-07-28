@@ -19,7 +19,7 @@ pub struct Entries {
 }
 
 pub trait Entry {
-    fn display(&self);
+    fn display(&self, listing_format: bool);
     fn get_name(&self) -> &String;
 }
 
@@ -43,7 +43,7 @@ fn display_error_at_open(path_str: &str, err: Error) {
 }
 
 pub fn load_entries(
-    options: [bool; NBR_OPTIONS],
+    options: &[bool; NBR_OPTIONS],
     paths_str: Vec<String>,
 ) -> Entries {
     let mut files = Vec::new();
@@ -65,7 +65,7 @@ pub fn load_entries(
                 folders.push(folder);
             }
         } else {
-            files.push(File::new(&path_str));
+            files.push(File::new(&path_str, &path_str));
         }
     }
 

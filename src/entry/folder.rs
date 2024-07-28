@@ -12,6 +12,7 @@ pub struct Folder {
 
 fn load_sub_entries(
     paths: Vec<PathBuf>,
+    dir_path_str: &str,
     display_all: bool,
     open_sub_dirs: bool,
 ) -> Entries {
@@ -32,6 +33,7 @@ fn load_sub_entries(
             continue;
         }
 
+        // TODO maybe moove this if in display function
         if path.is_dir() && open_sub_dirs {
             let folder_result =
                 Folder::new(path_str, display_all, open_sub_dirs)
@@ -42,12 +44,12 @@ fn load_sub_entries(
             }
         }
 
-        files.push(File::new(file_name));
+        files.push(File::new(path_str, file_name));
     }
 
     if display_all {
-        files.push(File::new("."));
-        files.push(File::new(".."));
+        files.push(File::new(&format!("{}{}", dir_path_str, "/."), "."));
+        files.push(File::new(&format!("{}{}", dir_path_str, "/.."), ".."));
     }
 
     sort_entries(&mut files);
@@ -71,23 +73,28 @@ impl Folder {
 
         Ok(Self {
             path_str: path_str.to_string(),
-            entries: load_sub_entries(sub_paths, display_all, open_sub_dirs),
+            entries: load_sub_entries(
+                sub_paths,
+                path_str,
+                display_all,
+                open_sub_dirs,
+            ),
         })
     }
 }
 
 impl Entry for Folder {
-    fn display(&self) {
+    fn display(&self, listing_format: bool) {
         for file in &self.entries.files {
-            file.display();
+            file.display(listing_format);
         }
-        if self.entries.files.len() > 0 {
+        if self.entries.files.len() > 0 && !listing_format {
             println!();
         }
 
         for folder in &self.entries.folders {
             println!("\n{}:", folder.path_str);
-            folder.display();
+            folder.display(listing_format);
         }
     }
 
