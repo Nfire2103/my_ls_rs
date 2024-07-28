@@ -56,14 +56,14 @@ pub fn load_entries(
         }
 
         if entry.is_dir() && !options[DIRECTORY] {
-            let folder_result = Folder::new(&path, true, options[ALL])
+            let folder_result = Folder::new(&path, options[ALL])
                 .map_err(|err| display_error_at_open(&path, err));
 
             if let Ok(folder) = folder_result {
                 folders.push(folder);
             }
         } else {
-            files.push(File::new(path));
+            files.push(File::new(&path));
         }
     }
 

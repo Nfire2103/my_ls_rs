@@ -1,20 +1,22 @@
 use super::file::File;
-use super::sort::sort_sub_entries;
-use super::{display_error_at_open, Entry};
+use super::sort::sort_entries;
+use super::{display_error_at_open, Entries, Entry};
 use std::fs::read_dir;
 use std::io::Error;
 use std::path::PathBuf;
 
 pub struct Folder {
-    pub name: String,
-    entries: Vec<Box<dyn Entry>>,
+    name: String,
+    entries: Entries,
 }
 
 fn load_sub_entries(
     paths: Vec<PathBuf>,
     display_all: bool,
-) -> Vec<Box<dyn Entry>> {
-    let mut entries: Vec<Box<dyn Entry>> = Vec::new();
+    open_sub_dirs: bool,
+) -> Entries {
+    let mut files = Vec::new();
+    let mut folders = Vec::new();
 
     for path in paths {
         let Some(path_str) = path.to_str() else {
@@ -30,67 +32,58 @@ fn load_sub_entries(
             continue;
         }
 
-        if path.is_dir() {
-            let folder_result = Folder::new(file_name, false, display_all)
+        if path.is_dir() && open_sub_dirs {
+            let folder_result = Folder::new(file_name, display_all)
                 .map_err(|err| display_error_at_open(path_str, err));
 
             if let Ok(folder) = folder_result {
-                entries.push(Box::new(folder));
+                folders.push(folder);
             }
-        } else {
-            entries.push(Box::new(File::new(file_name.to_string())));
         }
+
+        files.push(File::new(file_name));
     }
 
     if display_all {
-        entries.push(Box::new(Folder::new(".", false, display_all).unwrap()));
-        entries.push(Box::new(Folder::new("..", false, display_all).unwrap()));
+        files.push(File::new("."));
+        files.push(File::new(".."));
     }
 
-    sort_sub_entries(&mut entries);
+    sort_entries(&mut files);
+    sort_entries(&mut folders);
 
-    entries
+    Entries { files, folders }
 }
 
 impl Folder {
-    pub fn new(
-        path: &str,
-        open_dir: bool,
-        display_all: bool,
-    ) -> Result<Self, Error> {
+    pub fn new(path: &str, display_all: bool) -> Result<Self, Error> {
         let mut sub_paths = Vec::new();
-        let mut entries = Vec::new();
+        let mut read_dir = read_dir(path)?;
 
-        if open_dir {
-            let mut read_dir = read_dir(path)?;
-
-            while let Some(Ok(entry)) = read_dir.next() {
-                sub_paths.push(entry.path());
-            }
-
-            entries = load_sub_entries(sub_paths, display_all);
+        while let Some(Ok(entry)) = read_dir.next() {
+            sub_paths.push(entry.path());
         }
 
         Ok(Self {
             name: path.to_string(),
-            entries,
+            entries: load_sub_entries(sub_paths, display_all, false),
         })
-    }
-
-    pub fn display_listed(&self) {
-        for entry in &self.entries {
-            entry.display();
-        }
-
-        if self.entries.len() > 0 {
-            println!();
-        }
     }
 }
 
 impl Entry for Folder {
     fn display(&self) {
-        print!("{}  ", self.name);
+        for entry in &self.entries.files {
+            entry.display();
+        }
+        if self.entries.files.len() > 0 {
+            println!();
+        }
+
+        // TODO handle breakline correctly
+        for entry in &self.entries.folders {
+            entry.display();
+        }
     }
 
     fn get_name(&self) -> &String {

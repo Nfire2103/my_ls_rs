@@ -5,8 +5,10 @@ pub struct File {
 }
 
 impl File {
-    pub fn new(path: String) -> Self {
-        Self { name: path }
+    pub fn new(path: &str) -> Self {
+        Self {
+            name: path.to_string(),
+        }
     }
 }
 

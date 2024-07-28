@@ -26,9 +26,9 @@ fn main() {
 
     for (i, entry) in entries.folders.iter().enumerate() {
         if nbr_entries > 1 {
-            println!("{}:", entry.name);
+            println!("{}:", entry.get_name());
         }
-        entry.display_listed();
+        entry.display();
         printlnif!(i != nbr_folders - 1);
     }
 }
