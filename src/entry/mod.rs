@@ -5,6 +5,7 @@ mod sort;
 use super::args::ALL;
 use super::args::DIRECTORY;
 use super::args::NBR_OPTIONS;
+use super::args::RECURSIVE;
 use file::File;
 use folder::Folder;
 use sort::sort_entries;
@@ -56,8 +57,9 @@ pub fn load_entries(
         }
 
         if entry.is_dir() && !options[DIRECTORY] {
-            let folder_result = Folder::new(&path, options[ALL])
-                .map_err(|err| display_error_at_open(&path, err));
+            let folder_result =
+                Folder::new(&path, options[ALL], options[RECURSIVE])
+                    .map_err(|err| display_error_at_open(&path, err));
 
             if let Ok(folder) = folder_result {
                 folders.push(folder);

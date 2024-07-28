@@ -6,7 +6,7 @@ use std::io::Error;
 use std::path::PathBuf;
 
 pub struct Folder {
-    name: String,
+    path_str: String,
     entries: Entries,
 }
 
@@ -33,8 +33,9 @@ fn load_sub_entries(
         }
 
         if path.is_dir() && open_sub_dirs {
-            let folder_result = Folder::new(file_name, display_all)
-                .map_err(|err| display_error_at_open(path_str, err));
+            let folder_result =
+                Folder::new(path_str, display_all, open_sub_dirs)
+                    .map_err(|err| display_error_at_open(path_str, err));
 
             if let Ok(folder) = folder_result {
                 folders.push(folder);
@@ -56,7 +57,11 @@ fn load_sub_entries(
 }
 
 impl Folder {
-    pub fn new(path: &str, display_all: bool) -> Result<Self, Error> {
+    pub fn new(
+        path: &str,
+        display_all: bool,
+        open_sub_dirs: bool,
+    ) -> Result<Self, Error> {
         let mut sub_paths = Vec::new();
         let mut read_dir = read_dir(path)?;
 
@@ -65,8 +70,8 @@ impl Folder {
         }
 
         Ok(Self {
-            name: path.to_string(),
-            entries: load_sub_entries(sub_paths, display_all, false),
+            path_str: path.to_string(),
+            entries: load_sub_entries(sub_paths, display_all, open_sub_dirs),
         })
     }
 }
@@ -80,13 +85,13 @@ impl Entry for Folder {
             println!();
         }
 
-        // TODO handle breakline correctly
         for entry in &self.entries.folders {
+            println!("\n{}:", entry.path_str);
             entry.display();
         }
     }
 
     fn get_name(&self) -> &String {
-        return &self.name;
+        return &self.path_str;
     }
 }
