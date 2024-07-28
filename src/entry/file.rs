@@ -4,6 +4,7 @@ use std::fs::metadata;
 use std::os::unix::fs::MetadataExt;
 use users::{get_group_by_gid, get_user_by_uid};
 
+#[derive(Default)]
 pub struct File {
     mode: String,
     nlink: u64,
@@ -74,8 +75,10 @@ fn get_edit_time(mtime: i64, path_str: &str) -> String {
 
 impl File {
     pub fn new(path_str: &str, file_name: &str) -> Self {
-        // TODO handle error correctly
-        let metada = metadata(path_str).unwrap();
+        let Ok(metada) = metadata(path_str) else {
+            println!("{}: Failed to load metadata!", path_str);
+            return Self::default();
+        };
 
         Self {
             mode: format_mode(metada.mode(), metada.is_dir()),
