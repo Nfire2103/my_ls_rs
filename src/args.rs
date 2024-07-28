@@ -93,5 +93,9 @@ pub fn parse() -> ParseRes {
         }
     }
 
+    if paths_str.is_empty() {
+        paths_str.push(".".to_string());
+    }
+
     ParseRes { options, paths_str }
 }
