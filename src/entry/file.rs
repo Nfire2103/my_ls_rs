@@ -12,7 +12,8 @@ pub struct File {
     group: String,
     size: u64,
     pub blocks: u64,
-    edit: String,
+    mtime: i64,
+    mtime_str: String,
     name: String,
 }
 
@@ -64,7 +65,7 @@ fn get_group(gid: u32, path_str: &str) -> String {
     owner.to_string()
 }
 
-fn get_edit_time(mtime: i64, path_str: &str) -> String {
+fn format_mtime(mtime: i64, path_str: &str) -> String {
     let Some(datetime) = DateTime::<Utc>::from_timestamp(mtime, 0) else {
         println!("{}: Failed to get the timestamp!", path_str);
         return mtime.to_string();
@@ -82,13 +83,14 @@ impl File {
 
         Self {
             mode: format_mode(metada.mode(), metada.is_dir()),
-            name: file_name.to_string(),
             nlink: metada.nlink(),
             owner: get_owner(metada.uid(), path_str),
             group: get_group(metada.gid(), path_str),
             size: metada.size(),
             blocks: metada.blocks(),
-            edit: get_edit_time(metada.mtime(), path_str),
+            mtime: metada.mtime(),
+            mtime_str: format_mtime(metada.mtime(), path_str),
+            name: file_name.to_string(),
         }
     }
 }
@@ -103,7 +105,7 @@ impl Entry for File {
                 self.owner,
                 self.group,
                 self.size,
-                self.edit,
+                self.mtime_str,
                 self.name,
             );
         } else {
@@ -113,5 +115,9 @@ impl Entry for File {
 
     fn get_name(&self) -> &String {
         return &self.name;
+    }
+
+    fn get_mtime(&self) -> i64 {
+        return self.mtime;
     }
 }

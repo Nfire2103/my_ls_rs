@@ -1,12 +1,16 @@
 use super::file::File;
 use super::sort::sort_entries;
 use super::{display_error_at_open, Entries, Entry};
-use std::fs::read_dir;
+use crate::args::{ALL, NBR_OPTIONS, RECURSIVE, TIME};
+use std::fs::{metadata, read_dir};
 use std::io::Error;
+use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 
+#[derive(Default)]
 pub struct Folder {
     path_str: String,
+    mtime: i64,
     entries: Entries,
 }
 
@@ -17,8 +21,7 @@ fn get_nbr_blks(files: &Vec<File>) -> u64 {
 fn load_sub_entries(
     paths: Vec<PathBuf>,
     dir_path_str: &str,
-    display_all: bool,
-    open_sub_dirs: bool,
+    options: &[bool; NBR_OPTIONS],
 ) -> Entries {
     let mut files = Vec::new();
     let mut folders = Vec::new();
@@ -33,15 +36,14 @@ fn load_sub_entries(
         let Some(file_name) = os_file_name.to_str() else {
             continue;
         };
-        if file_name.starts_with('.') && !display_all {
+        if file_name.starts_with('.') && !options[ALL] {
             continue;
         }
 
         // TODO maybe moove this if in display function
-        if path.is_dir() && open_sub_dirs {
-            let folder_result =
-                Folder::new(path_str, display_all, open_sub_dirs)
-                    .map_err(|err| display_error_at_open(path_str, err));
+        if path.is_dir() && options[RECURSIVE] {
+            let folder_result = Folder::new(path_str, options)
+                .map_err(|err| display_error_at_open(path_str, err));
 
             if let Ok(folder) = folder_result {
                 folders.push(folder);
@@ -51,13 +53,13 @@ fn load_sub_entries(
         files.push(File::new(path_str, file_name));
     }
 
-    if display_all {
+    if options[ALL] {
         files.push(File::new(&format!("{}{}", dir_path_str, "/."), "."));
         files.push(File::new(&format!("{}{}", dir_path_str, "/.."), ".."));
     }
 
-    sort_entries(&mut files);
-    sort_entries(&mut folders);
+    sort_entries(&mut files, options[TIME]);
+    sort_entries(&mut folders, options[TIME]);
 
     Entries { files, folders }
 }
@@ -65,8 +67,7 @@ fn load_sub_entries(
 impl Folder {
     pub fn new(
         path_str: &str,
-        display_all: bool,
-        open_sub_dirs: bool,
+        options: &[bool; NBR_OPTIONS],
     ) -> Result<Self, Error> {
         let mut sub_paths = Vec::new();
         let mut read_dir = read_dir(path_str)?;
@@ -75,14 +76,15 @@ impl Folder {
             sub_paths.push(dir_entry.path());
         }
 
+        let Ok(metada) = metadata(path_str) else {
+            println!("{}: Failed to load metadata!", path_str);
+            return Ok(Self::default());
+        };
+
         Ok(Self {
             path_str: path_str.to_string(),
-            entries: load_sub_entries(
-                sub_paths,
-                path_str,
-                display_all,
-                open_sub_dirs,
-            ),
+            mtime: metada.mtime(),
+            entries: load_sub_entries(sub_paths, path_str, options),
         })
     }
 }
@@ -107,5 +109,9 @@ impl Entry for Folder {
 
     fn get_name(&self) -> &String {
         return &self.path_str;
+    }
+
+    fn get_mtime(&self) -> i64 {
+        return self.mtime;
     }
 }

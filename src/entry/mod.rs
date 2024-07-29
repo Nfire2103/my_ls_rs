@@ -2,10 +2,7 @@ mod file;
 mod folder;
 mod sort;
 
-use super::args::ALL;
-use super::args::DIRECTORY;
-use super::args::NBR_OPTIONS;
-use super::args::RECURSIVE;
+use crate::args::{DIRECTORY, NBR_OPTIONS, TIME};
 use file::File;
 use folder::Folder;
 use sort::sort_entries;
@@ -13,6 +10,7 @@ use std::env;
 use std::io::Error;
 use std::path::PathBuf;
 
+#[derive(Default)]
 pub struct Entries {
     pub files: Vec<File>,
     pub folders: Vec<Folder>,
@@ -21,6 +19,7 @@ pub struct Entries {
 pub trait Entry {
     fn display(&self, listing_format: bool);
     fn get_name(&self) -> &String;
+    fn get_mtime(&self) -> i64;
 }
 
 fn display_no_such_file(path_str: &str) {
@@ -57,9 +56,8 @@ pub fn load_entries(
         }
 
         if path.is_dir() && !options[DIRECTORY] {
-            let folder_result =
-                Folder::new(&path_str, options[ALL], options[RECURSIVE])
-                    .map_err(|err| display_error_at_open(&path_str, err));
+            let folder_result = Folder::new(&path_str, options)
+                .map_err(|err| display_error_at_open(&path_str, err));
 
             if let Ok(folder) = folder_result {
                 folders.push(folder);
@@ -69,8 +67,8 @@ pub fn load_entries(
         }
     }
 
-    sort_entries(&mut files);
-    sort_entries(&mut folders);
+    sort_entries(&mut files, options[TIME]);
+    sort_entries(&mut folders, options[TIME]);
 
     Entries { files, folders }
 }
