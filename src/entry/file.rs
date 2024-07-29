@@ -90,7 +90,35 @@ fn format_mtime(mtime: i64, path_str: &str) -> String {
     datetime.format("%b %e %H:%M").to_string()
 }
 
-fn get_color_escape(file_type: FileType) -> &'static str {
+fn get_file_extension(path_str: &str) -> String {
+    let extension: String =
+        path_str.chars().rev().take_while(|&c| c != '.').collect();
+
+    extension.chars().rev().collect()
+}
+
+fn is_exec(mode: u32) -> bool {
+    mode & 0o100 != 0 || mode & 0o010 != 0 || mode & 0o001 != 0
+}
+
+fn get_color_escape(
+    path_str: &str,
+    file_type: FileType,
+    mode: u32,
+) -> &'static str {
+    let mut ext_color = match get_file_extension(path_str).as_str() {
+        "png" | "jpg" | "jpeg" | "webp" | "svg" | "gif" | "mp4" | "ppm"
+        | "bmp" | "tiff" => "\x1b[1;31m",
+        "zip" | "tar" | "tgz" | "gz" | "rar" | "7z" | "jar" | "bz2" | "deb"
+        | "war" => "\x1b[1;35m",
+        "mp3" | "ogg" | "wav" | "flac" | "aac" => "\x1b[36m",
+        _ => "",
+    };
+
+    if is_exec(mode) {
+        ext_color = "\x1b[1;32m"
+    }
+
     match () {
         _ if file_type.is_dir() => "\x1b[1;34m",
         _ if file_type.is_symlink() => "\x1b[1;36m",
@@ -98,7 +126,7 @@ fn get_color_escape(file_type: FileType) -> &'static str {
         _ if file_type.is_socket() => "\x1b[1;35m",
         _ if file_type.is_char_device() => "\x1b[1;33;40m",
         _ if file_type.is_block_device() => "\x1b[1;33;40m",
-        _ => "",
+        _ => ext_color,
     }
 }
 
@@ -149,7 +177,11 @@ impl File {
             blocks: metada.blocks(),
             mtime: metada.mtime(),
             mtime_str: format_mtime(metada.mtime(), path_str),
-            color: get_color_escape(metada.file_type()),
+            color: get_color_escape(
+                path_str,
+                metada.file_type(),
+                metada.mode(),
+            ),
             name: file_name.to_string(),
             target: get_symlink_target(path_str, metada.is_symlink()),
         }
