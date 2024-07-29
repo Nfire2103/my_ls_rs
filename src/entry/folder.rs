@@ -2,7 +2,7 @@ use super::file::File;
 use super::sort::sort_entries;
 use super::{display_error_at_open, Entries, Entry};
 use crate::args::{ALL, NBR_OPTIONS, RECURSIVE, REVERSE, TIME};
-use std::fs::{metadata, read_dir};
+use std::fs::{read_dir, symlink_metadata};
 use std::io::Error;
 use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
@@ -76,7 +76,7 @@ impl Folder {
             sub_paths.push(dir_entry.path());
         }
 
-        let Ok(metada) = metadata(path_str) else {
+        let Ok(metada) = symlink_metadata(path_str) else {
             println!("{}: Failed to load metadata!", path_str);
             return Ok(Self::default());
         };

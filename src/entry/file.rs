@@ -1,6 +1,6 @@
 use super::Entry;
 use chrono::{DateTime, Utc};
-use std::fs::{metadata, FileType};
+use std::fs::{symlink_metadata, FileType};
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
 use users::{get_group_by_gid, get_user_by_uid};
 
@@ -88,7 +88,7 @@ fn format_mtime(mtime: i64, path_str: &str) -> String {
 
 impl File {
     pub fn new(path_str: &str, file_name: &str) -> Self {
-        let Ok(metada) = metadata(path_str) else {
+        let Ok(metada) = symlink_metadata(path_str) else {
             println!("{}: Failed to load metadata!", path_str);
             return Self::default();
         };
