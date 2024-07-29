@@ -22,6 +22,14 @@ pub trait Entry {
     fn get_mtime(&self) -> i64;
 }
 
+pub fn format_name(file_name: &str) -> String {
+    if file_name.contains(' ') {
+        format!("\'{}\'", file_name)
+    } else {
+        file_name.to_string()
+    }
+}
+
 fn display_no_such_file(path_str: &str) {
     println!(
         "{}: cannot access \'{}\': No such file or directory",

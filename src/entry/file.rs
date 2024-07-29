@@ -1,4 +1,4 @@
-use super::Entry;
+use super::{format_name, Entry};
 use chrono::{DateTime, Utc};
 use std::fs::{read_link, symlink_metadata, FileType};
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
@@ -200,7 +200,7 @@ impl Entry for File {
                 self.size,
                 self.mtime_str,
                 self.color,
-                self.name,
+                format_name(&self.name),
                 RESET_COLOR,
             );
 
@@ -211,7 +211,12 @@ impl Entry for File {
 
             println!();
         } else {
-            print!("{}{}{}  ", self.color, self.name, RESET_COLOR);
+            print!(
+                "{}{}{}  ",
+                self.color,
+                format_name(&self.name),
+                RESET_COLOR
+            );
         }
     }
 

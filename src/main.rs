@@ -2,7 +2,7 @@ mod args;
 mod entry;
 
 use args::LISTING;
-use entry::{load_entries, Entry};
+use entry::{format_name, load_entries, Entry};
 
 macro_rules! printlnif {
     ($val:expr) => {
@@ -29,7 +29,7 @@ fn main() {
 
     for (i, folder) in entries.folders.iter().enumerate() {
         if nbr_entries > 1 {
-            println!("{}:", folder.get_name());
+            println!("{}:", format_name(folder.get_name()));
         }
         folder.display(options[LISTING]);
         printlnif!(i != nbr_folders - 1);

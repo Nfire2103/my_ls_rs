@@ -1,6 +1,6 @@
 use super::file::File;
 use super::sort::sort_entries;
-use super::{display_error_at_open, Entries, Entry};
+use super::{display_error_at_open, format_name, Entries, Entry};
 use crate::args::{ALL, NBR_OPTIONS, RECURSIVE, REVERSE, TIME};
 use std::fs::{read_dir, symlink_metadata};
 use std::io::Error;
@@ -102,7 +102,7 @@ impl Entry for Folder {
         }
 
         for folder in &self.entries.folders {
-            println!("\n{}:", folder.path_str);
+            println!("\n{}:", format_name(&folder.path_str));
             folder.display(listing_format);
         }
     }
