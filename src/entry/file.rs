@@ -102,6 +102,13 @@ fn get_color_escape(file_type: FileType) -> &'static str {
     }
 }
 
+fn get_symlink_dir_path(path_str: &str) -> String {
+    let dir_path_str: String =
+        path_str.chars().rev().skip_while(|&c| c != '/').collect();
+
+    dir_path_str.chars().rev().collect()
+}
+
 fn get_symlink_target(
     sym_path_str: &str,
     is_symlink: bool,
@@ -118,7 +125,12 @@ fn get_symlink_target(
         return None;
     };
 
-    Some(Box::new(File::new(path_str, path_str)))
+    let mut dir_path_str: String = String::default();
+    if !path_str.starts_with('/') {
+        dir_path_str = get_symlink_dir_path(sym_path_str);
+    }
+
+    Some(Box::new(File::new(&(dir_path_str + path_str), path_str)))
 }
 
 impl File {
