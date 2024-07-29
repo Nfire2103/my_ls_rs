@@ -4,6 +4,8 @@ use std::fs::{symlink_metadata, FileType};
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
 use users::{get_group_by_gid, get_user_by_uid};
 
+const RESET_COLOR: &str = "\x1B[0m";
+
 #[derive(Default)]
 pub struct File {
     mode: String,
@@ -14,6 +16,7 @@ pub struct File {
     pub blocks: u64,
     mtime: i64,
     mtime_str: String,
+    color: &'static str,
     name: String,
 }
 
@@ -86,6 +89,18 @@ fn format_mtime(mtime: i64, path_str: &str) -> String {
     datetime.format("%b %e %H:%M").to_string()
 }
 
+fn get_color_escape(file_type: FileType) -> &'static str {
+    match () {
+        _ if file_type.is_dir() => "\x1b[1;34m",
+        _ if file_type.is_symlink() => "\x1b[1;36m",
+        _ if file_type.is_fifo() => "\x1b[33;40m",
+        _ if file_type.is_socket() => "\x1b[1;35m",
+        _ if file_type.is_char_device() => "\x1b[1;33;40m",
+        _ if file_type.is_block_device() => "\x1b[1;33;40m",
+        _ => "",
+    }
+}
+
 impl File {
     pub fn new(path_str: &str, file_name: &str) -> Self {
         let Ok(metada) = symlink_metadata(path_str) else {
@@ -102,6 +117,7 @@ impl File {
             blocks: metada.blocks(),
             mtime: metada.mtime(),
             mtime_str: format_mtime(metada.mtime(), path_str),
+            color: get_color_escape(metada.file_type()),
             name: file_name.to_string(),
         }
     }
@@ -111,17 +127,19 @@ impl Entry for File {
     fn display(&self, listing_format: bool) {
         if listing_format {
             println!(
-                "{} {} {} {} {:>4} {} {}",
+                "{} {} {} {} {:>4} {} {}{}{}",
                 self.mode,
                 self.nlink,
                 self.owner,
                 self.group,
                 self.size,
                 self.mtime_str,
+                self.color,
                 self.name,
+                RESET_COLOR,
             );
         } else {
-            print!("{}  ", self.name);
+            print!("{}{}{}  ", self.color, self.name, RESET_COLOR);
         }
     }
 
