@@ -56,9 +56,12 @@ pub fn get_color_escape(
         _ => "",
     };
 
-    if is_exec(mode) {
-        ext_color = "\x1b[1;32m"
-    }
+    ext_color = match () {
+        _ if mode & 0o4000 != 0 => "\x1b[41m",
+        _ if mode & 0o2000 != 0 => "\x1b[30;43m",
+        _ if is_exec(mode) => "\x1b[1;32m",
+        _ => ext_color,
+    };
 
     match () {
         _ if file_type.is_dir() => "\x1b[1;34m",
