@@ -13,6 +13,33 @@ fn get_char_type(file_type: FileType) -> char {
     }
 }
 
+fn get_first_exec_char(mode: u32) -> char {
+    match () {
+        _ if mode & 0o100 != 0 && mode & 0o4000 != 0 => 's',
+        _ if mode & 0o4000 != 0 => 'S',
+        _ if mode & 0o100 != 0 => 'x',
+        _ => '-',
+    }
+}
+
+fn get_second_exec_char(mode: u32) -> char {
+    match () {
+        _ if mode & 0o010 != 0 && mode & 0o2000 != 0 => 's',
+        _ if mode & 0o2000 != 0 => 'S',
+        _ if mode & 0o010 != 0 => 'x',
+        _ => '-',
+    }
+}
+
+fn get_third_exec_char(mode: u32) -> char {
+    match () {
+        _ if mode & 0o001 != 0 && mode & 0o1000 != 0 => 't',
+        _ if mode & 0o1000 != 0 => 'T',
+        _ if mode & 0o001 != 0 => 'x',
+        _ => '-',
+    }
+}
+
 pub fn format_mode(mode: u32, file_type: FileType) -> String {
     let mut mode_str = String::new();
 
@@ -20,15 +47,15 @@ pub fn format_mode(mode: u32, file_type: FileType) -> String {
 
     mode_str.push(if mode & 0o400 != 0 { 'r' } else { '-' });
     mode_str.push(if mode & 0o200 != 0 { 'w' } else { '-' });
-    mode_str.push(if mode & 0o100 != 0 { 'x' } else { '-' });
+    mode_str.push(get_first_exec_char(mode));
 
     mode_str.push(if mode & 0o040 != 0 { 'r' } else { '-' });
     mode_str.push(if mode & 0o020 != 0 { 'w' } else { '-' });
-    mode_str.push(if mode & 0o010 != 0 { 'x' } else { '-' });
+    mode_str.push(get_second_exec_char(mode));
 
     mode_str.push(if mode & 0o004 != 0 { 'r' } else { '-' });
     mode_str.push(if mode & 0o002 != 0 { 'w' } else { '-' });
-    mode_str.push(if mode & 0o001 != 0 { 'x' } else { '-' });
+    mode_str.push(get_third_exec_char(mode));
 
     mode_str
 }
