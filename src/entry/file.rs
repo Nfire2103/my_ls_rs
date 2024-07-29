@@ -1,6 +1,6 @@
 use super::Entry;
 use chrono::{DateTime, Utc};
-use std::fs::{symlink_metadata, FileType};
+use std::fs::{read_link, symlink_metadata, FileType};
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
 use users::{get_group_by_gid, get_user_by_uid};
 
@@ -18,6 +18,7 @@ pub struct File {
     mtime_str: String,
     color: &'static str,
     name: String,
+    target: Option<Box<File>>,
 }
 
 fn get_char_type(file_type: FileType) -> char {
@@ -101,6 +102,25 @@ fn get_color_escape(file_type: FileType) -> &'static str {
     }
 }
 
+fn get_symlink_target(
+    sym_path_str: &str,
+    is_symlink: bool,
+) -> Option<Box<File>> {
+    if !is_symlink {
+        return None;
+    }
+    let Ok(path) = read_link(sym_path_str) else {
+        println!("{}: Failed to get the target of the symlink!", sym_path_str);
+        return None;
+    };
+    let Some(path_str) = path.to_str() else {
+        println!("{}: Failed to get the target of the symlink!", sym_path_str);
+        return None;
+    };
+
+    Some(Box::new(File::new(path_str, path_str)))
+}
+
 impl File {
     pub fn new(path_str: &str, file_name: &str) -> Self {
         let Ok(metada) = symlink_metadata(path_str) else {
@@ -119,6 +139,7 @@ impl File {
             mtime_str: format_mtime(metada.mtime(), path_str),
             color: get_color_escape(metada.file_type()),
             name: file_name.to_string(),
+            target: get_symlink_target(path_str, metada.is_symlink()),
         }
     }
 }
@@ -126,7 +147,7 @@ impl File {
 impl Entry for File {
     fn display(&self, listing_format: bool) {
         if listing_format {
-            println!(
+            print!(
                 "{} {} {} {} {:>4} {} {}{}{}",
                 self.mode,
                 self.nlink,
@@ -138,6 +159,13 @@ impl Entry for File {
                 self.name,
                 RESET_COLOR,
             );
+
+            if let Some(target) = &self.target {
+                print!(" -> ");
+                target.display(false);
+            }
+
+            println!();
         } else {
             print!("{}{}{}  ", self.color, self.name, RESET_COLOR);
         }
