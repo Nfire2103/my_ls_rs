@@ -1,5 +1,7 @@
 mod file;
 mod folder;
+pub mod format;
+pub mod metadata;
 mod sort;
 
 use crate::args::{DIRECTORY, NBR_OPTIONS, REVERSE, TIME};
@@ -20,14 +22,6 @@ pub trait Entry {
     fn display(&self, listing_format: bool);
     fn get_name(&self) -> &String;
     fn get_mtime(&self) -> i64;
-}
-
-pub fn format_name(file_name: &str) -> String {
-    if file_name.contains(' ') {
-        format!("\'{}\'", file_name)
-    } else {
-        file_name.to_string()
-    }
 }
 
 fn display_no_such_file(path_str: &str) {

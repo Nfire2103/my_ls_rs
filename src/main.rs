@@ -2,7 +2,8 @@ mod args;
 mod entry;
 
 use args::LISTING;
-use entry::{format_name, load_entries, Entry};
+use entry::format::format_name;
+use entry::{load_entries, Entry};
 
 macro_rules! printlnif {
     ($val:expr) => {

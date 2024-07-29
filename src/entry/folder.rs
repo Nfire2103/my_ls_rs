@@ -1,6 +1,7 @@
 use super::file::File;
+use super::format::format_name;
 use super::sort::sort_entries;
-use super::{display_error_at_open, format_name, Entries, Entry};
+use super::{display_error_at_open, Entries, Entry};
 use crate::args::{ALL, NBR_OPTIONS, RECURSIVE, REVERSE, TIME};
 use std::fs::{read_dir, symlink_metadata};
 use std::io::Error;
