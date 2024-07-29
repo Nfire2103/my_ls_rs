@@ -1,3 +1,6 @@
+#[macro_use]
+mod macros;
+
 mod file;
 mod folder;
 pub mod format;

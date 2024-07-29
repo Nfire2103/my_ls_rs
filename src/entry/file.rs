@@ -14,6 +14,8 @@ pub struct File {
     nlink: u64,
     owner: String,
     group: String,
+    major: u64,
+    minor: u64,
     size: u64,
     pub blocks: u64,
     mtime: i64,
@@ -35,6 +37,8 @@ impl File {
             nlink: metada.nlink(),
             owner: get_owner(metada.uid(), path_str),
             group: get_group(metada.gid(), path_str),
+            major: major!(metada.rdev()),
+            minor: minor!(metada.rdev()),
             size: metada.size(),
             blocks: metada.blocks(),
             mtime: metada.mtime(),
@@ -48,37 +52,46 @@ impl File {
             target: get_symlink_target(path_str, metada.is_symlink()),
         }
     }
+
+    fn display_listing(&self) {
+        print!(
+            "{} {} {} {} ",
+            self.mode, self.nlink, self.owner, self.group
+        );
+
+        if self.major != 0 {
+            print!("{} {} ", self.major, self.minor);
+        } else {
+            print!("{:>4} ", self.size);
+        }
+
+        print!(
+            "{} {}{}{}",
+            self.mtime_str,
+            self.color,
+            format_name(&self.name),
+            RESET_COLOR
+        );
+
+        if let Some(target) = &self.target {
+            print!(" -> ");
+            target.display(false);
+        }
+
+        println!();
+    }
+
+    fn display_simple(&self) {
+        print!("{}{}{}  ", self.color, format_name(&self.name), RESET_COLOR);
+    }
 }
 
 impl Entry for File {
     fn display(&self, listing_format: bool) {
         if listing_format {
-            print!(
-                "{} {} {} {} {:>4} {} {}{}{}",
-                self.mode,
-                self.nlink,
-                self.owner,
-                self.group,
-                self.size,
-                self.mtime_str,
-                self.color,
-                format_name(&self.name),
-                RESET_COLOR,
-            );
-
-            if let Some(target) = &self.target {
-                print!(" -> ");
-                target.display(false);
-            }
-
-            println!();
+            self.display_listing();
         } else {
-            print!(
-                "{}{}{}  ",
-                self.color,
-                format_name(&self.name),
-                RESET_COLOR
-            );
+            self.display_simple();
         }
     }
 
