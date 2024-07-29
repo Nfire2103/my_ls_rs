@@ -15,10 +15,18 @@ fn compare_by_name(entry_1: &impl Entry, entry_2: &impl Entry) -> Ordering {
     str_1.cmp(&str_2)
 }
 
-pub fn sort_entries(entries: &mut Vec<impl Entry>, sort_by_time: bool) {
-    if sort_by_time {
+pub fn sort_entries(
+    entries: &mut Vec<impl Entry>,
+    by_time: bool,
+    is_rev: bool,
+) {
+    if by_time {
         entries.sort_by(compare_by_time);
     } else {
         entries.sort_by(compare_by_name);
+    }
+
+    if is_rev {
+        entries.reverse();
     }
 }

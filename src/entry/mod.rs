@@ -2,7 +2,7 @@ mod file;
 mod folder;
 mod sort;
 
-use crate::args::{DIRECTORY, NBR_OPTIONS, TIME};
+use crate::args::{DIRECTORY, NBR_OPTIONS, REVERSE, TIME};
 use file::File;
 use folder::Folder;
 use sort::sort_entries;
@@ -67,8 +67,8 @@ pub fn load_entries(
         }
     }
 
-    sort_entries(&mut files, options[TIME]);
-    sort_entries(&mut folders, options[TIME]);
+    sort_entries(&mut files, options[TIME], options[REVERSE]);
+    sort_entries(&mut folders, options[TIME], options[REVERSE]);
 
     Entries { files, folders }
 }

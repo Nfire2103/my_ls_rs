@@ -1,7 +1,7 @@
 use super::file::File;
 use super::sort::sort_entries;
 use super::{display_error_at_open, Entries, Entry};
-use crate::args::{ALL, NBR_OPTIONS, RECURSIVE, TIME};
+use crate::args::{ALL, NBR_OPTIONS, RECURSIVE, REVERSE, TIME};
 use std::fs::{metadata, read_dir};
 use std::io::Error;
 use std::os::unix::fs::MetadataExt;
@@ -58,8 +58,8 @@ fn load_sub_entries(
         files.push(File::new(&format!("{}{}", dir_path_str, "/.."), ".."));
     }
 
-    sort_entries(&mut files, options[TIME]);
-    sort_entries(&mut folders, options[TIME]);
+    sort_entries(&mut files, options[TIME], options[REVERSE]);
+    sort_entries(&mut folders, options[TIME], options[REVERSE]);
 
     Entries { files, folders }
 }
