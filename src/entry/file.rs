@@ -1,7 +1,7 @@
 use super::Entry;
 use chrono::{DateTime, Utc};
-use std::fs::metadata;
-use std::os::unix::fs::MetadataExt;
+use std::fs::{metadata, FileType};
+use std::os::unix::fs::{FileTypeExt, MetadataExt};
 use users::{get_group_by_gid, get_user_by_uid};
 
 #[derive(Default)]
@@ -17,10 +17,22 @@ pub struct File {
     name: String,
 }
 
-fn format_mode(mode: u32, is_dir: bool) -> String {
+fn get_char_type(file_type: FileType) -> char {
+    match () {
+        _ if file_type.is_dir() => 'd',
+        _ if file_type.is_symlink() => 'l',
+        _ if file_type.is_fifo() => 'p',
+        _ if file_type.is_socket() => 's',
+        _ if file_type.is_char_device() => 'c',
+        _ if file_type.is_block_device() => 'b',
+        _ => '-',
+    }
+}
+
+fn format_mode(mode: u32, file_type: FileType) -> String {
     let mut mode_str = String::new();
 
-    mode_str.push(if is_dir { 'd' } else { '-' });
+    mode_str.push(get_char_type(file_type));
 
     mode_str.push(if mode & 0o400 != 0 { 'r' } else { '-' });
     mode_str.push(if mode & 0o200 != 0 { 'w' } else { '-' });
@@ -82,7 +94,7 @@ impl File {
         };
 
         Self {
-            mode: format_mode(metada.mode(), metada.is_dir()),
+            mode: format_mode(metada.mode(), metada.file_type()),
             nlink: metada.nlink(),
             owner: get_owner(metada.uid(), path_str),
             group: get_group(metada.gid(), path_str),
