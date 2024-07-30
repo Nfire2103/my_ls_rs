@@ -77,7 +77,7 @@ impl Folder {
         }
 
         let Ok(metada) = symlink_metadata(path_str) else {
-            println!("{}: Failed to load metadata!", path_str);
+            eprintln!("{}: Failed to load metadata!", path_str);
             return Ok(Self::default());
         };
 

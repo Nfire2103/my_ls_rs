@@ -26,12 +26,12 @@ fn display_help() {
 }
 
 fn exit_bad_big_option(option_str: &str) {
-    println!(
+    eprintln!(
         "{}: unrecognized option \'{}\'",
         env::args().nth(0).unwrap_or("my_ls_rs".to_string()),
         option_str
     );
-    println!(
+    eprintln!(
         "Try \'{} --help\' for more information.",
         env::args().nth(0).unwrap_or("my_ls_rs".to_string())
     );
@@ -46,12 +46,12 @@ fn retrieve_big_option(arg: &str, _: &mut [bool; NBR_OPTIONS]) {
 }
 
 fn exit_bad_small_option(option_c: char) {
-    println!(
+    eprintln!(
         "{}: option requires an argument -- \'{}\'",
         env::args().nth(0).unwrap_or("my_ls_rs".to_string()),
         option_c
     );
-    println!(
+    eprintln!(
         "Try \'{} --help\' for more information.",
         env::args().nth(0).unwrap_or("my_ls_rs".to_string())
     );

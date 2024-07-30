@@ -5,12 +5,12 @@ use users::{get_group_by_gid, get_user_by_uid};
 
 pub fn get_owner(uid: u32, path_str: &str) -> String {
     let Some(user) = get_user_by_uid(uid) else {
-        println!("{}: Failed to get the owner!", path_str);
+        eprintln!("{}: Failed to get the owner!", path_str);
         return uid.to_string();
     };
 
     let Some(owner) = user.name().to_str() else {
-        println!("{}: Failed to get the owner!", path_str);
+        eprintln!("{}: Failed to get the owner!", path_str);
         return uid.to_string();
     };
 
@@ -19,12 +19,12 @@ pub fn get_owner(uid: u32, path_str: &str) -> String {
 
 pub fn get_group(gid: u32, path_str: &str) -> String {
     let Some(user) = get_group_by_gid(gid) else {
-        println!("{}: Failed to get the group!", path_str);
+        eprintln!("{}: Failed to get the group!", path_str);
         return gid.to_string();
     };
 
     let Some(owner) = user.name().to_str() else {
-        println!("{}: Failed to get the group!", path_str);
+        eprintln!("{}: Failed to get the group!", path_str);
         return gid.to_string();
     };
 
@@ -89,15 +89,15 @@ pub fn get_symlink_target(
         return None;
     }
     let Ok(path) = read_link(sym_path_str) else {
-        println!("{}: Failed to get the target of the symlink!", sym_path_str);
+        eprintln!("{}: Failed to get the target of the symlink!", sym_path_str);
         return None;
     };
     let Some(path_str) = path.to_str() else {
-        println!("{}: Failed to get the target of the symlink!", sym_path_str);
+        eprintln!("{}: Failed to get the target of the symlink!", sym_path_str);
         return None;
     };
 
-    let mut dir_path_str: String = String::default();
+    let mut dir_path_str = String::default();
     if !path_str.starts_with('/') {
         dir_path_str = get_symlink_dir_path(sym_path_str);
     }

@@ -28,7 +28,7 @@ pub struct File {
 impl File {
     pub fn new(path_str: &str, file_name: &str) -> Self {
         let Ok(metada) = symlink_metadata(path_str) else {
-            println!("{}: Failed to load metadata!", path_str);
+            eprintln!("{}: Failed to load metadata!", path_str);
             return Self::default();
         };
 

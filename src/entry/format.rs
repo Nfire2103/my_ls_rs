@@ -62,7 +62,7 @@ pub fn format_mode(mode: u32, file_type: FileType) -> String {
 
 pub fn format_mtime(mtime: i64, path_str: &str) -> String {
     let Some(datetime) = DateTime::<Utc>::from_timestamp(mtime, 0) else {
-        println!("{}: Failed to get the timestamp!", path_str);
+        eprintln!("{}: Failed to get the timestamp!", path_str);
         return mtime.to_string();
     };
 
