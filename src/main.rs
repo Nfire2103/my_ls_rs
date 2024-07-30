@@ -2,7 +2,7 @@
 mod entry;
 mod args;
 
-use args::LISTING;
+use args::{LISTING, RECURSIVE};
 use entry::format::format_name;
 use entry::{load_entries, Entry};
 
@@ -22,7 +22,7 @@ fn main() {
     printlnif!(nbr_files > 0 && nbr_folders > 0);
 
     for (i, folder) in entries.folders.iter().enumerate() {
-        if nbr_entries > 1 {
+        if nbr_entries > 1 || options[RECURSIVE] {
             println!("{}:", format_name(folder.get_name()));
         }
         folder.display(options[LISTING]);
