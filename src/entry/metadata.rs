@@ -60,7 +60,7 @@ pub fn get_color_escape(
     file_type: FileType,
     mode: u32,
 ) -> &'static str {
-    let mut ext_color = match get_file_extension(path_str).as_str() {
+    let ext_color = match get_file_extension(path_str).as_str() {
         "png" | "jpg" | "jpeg" | "webp" | "svg" | "gif" | "mp4" | "ppm"
         | "bmp" | "tiff" => BOLD_MAGENTA,
         "zip" | "tar" | "tgz" | "gz" | "rar" | "7z" | "jar" | "bz2" | "deb"
@@ -69,14 +69,14 @@ pub fn get_color_escape(
         _ => "",
     };
 
-    ext_color = match () {
+    let perm_color = match () {
         _ if mode & 0o4000 != 0 => BACK_RED,
         _ if mode & 0o2000 != 0 => BLACK_BACK_YELLOW,
         _ if is_exec(mode) => BOLD_GREEN,
         _ => ext_color,
     };
 
-    match () {
+    let final_color = match () {
         _ if file_type.is_dir() && mode & 0o1000 != 0 => BACK_BLUE,
         _ if file_type.is_dir() => BOLD_BLUE,
         _ if file_type.is_symlink() => BOLD_CYAN,
@@ -84,8 +84,10 @@ pub fn get_color_escape(
         _ if file_type.is_socket() => BOLD_MAGENTA,
         _ if file_type.is_char_device() => BOLD_YELLOW_BACK_BLACK,
         _ if file_type.is_block_device() => BOLD_YELLOW_BACK_BLACK,
-        _ => ext_color,
-    }
+        _ => perm_color,
+    };
+
+    final_color
 }
 
 fn get_symlink_dir_path(path_str: &str) -> String {
