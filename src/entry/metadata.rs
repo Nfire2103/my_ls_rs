@@ -10,10 +10,11 @@ const BOLD_BLUE: &str = "\x1b[1;34m";
 const BOLD_MAGENTA: &str = "\x1b[1;35m";
 const BOLD_CYAN: &str = "\x1b[1;36m";
 const BACK_RED: &str = "\x1b[41m";
+const BACK_BLUE: &str = "\x1b[44m";
 const BLACK_BACK_YELLOW: &str = "\x1b[30;43m";
 const YELLOW_BACK_BLACK: &str = "\x1b[33;40m";
 const BOLD_YELLOW_BACK_BLACK: &str = "\x1b[1;33;40m";
-pub const RESET_COLOR: &str = "\x1B[0m";
+pub const RESET_COLOR: &str = "\x1b[0m";
 
 pub fn get_owner(uid: u32, path_str: &str) -> String {
     let Some(user) = get_user_by_uid(uid) else {
@@ -76,6 +77,7 @@ pub fn get_color_escape(
     };
 
     match () {
+        _ if file_type.is_dir() && mode & 0o1000 != 0 => BACK_BLUE,
         _ if file_type.is_dir() => BOLD_BLUE,
         _ if file_type.is_symlink() => BOLD_CYAN,
         _ if file_type.is_fifo() => YELLOW_BACK_BLACK,
