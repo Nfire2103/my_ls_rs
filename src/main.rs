@@ -1,17 +1,10 @@
-mod args;
+#[macro_use]
 mod entry;
+mod args;
 
 use args::LISTING;
 use entry::format::format_name;
 use entry::{load_entries, Entry};
-
-macro_rules! printlnif {
-    ($val:expr) => {
-        if $val {
-            println!();
-        }
-    };
-}
 
 fn main() {
     let parse_res = args::parse();

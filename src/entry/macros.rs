@@ -9,3 +9,11 @@ macro_rules! minor {
         $val & 0xff
     };
 }
+
+macro_rules! printlnif {
+    ($val:expr) => {
+        if $val {
+            println!();
+        }
+    };
+}
