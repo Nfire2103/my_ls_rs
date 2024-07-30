@@ -11,6 +11,8 @@ const BOLD_MAGENTA: &str = "\x1b[1;35m";
 const BOLD_CYAN: &str = "\x1b[1;36m";
 const BACK_RED: &str = "\x1b[41m";
 const BACK_BLUE: &str = "\x1b[44m";
+const BLACK_BACK_GREEN: &str = "\x1b[30;42m";
+const BLUE_BACK_GREEN: &str = "\x1b[34;42m";
 const BLACK_BACK_YELLOW: &str = "\x1b[30;43m";
 const YELLOW_BACK_BLACK: &str = "\x1b[33;40m";
 const BOLD_YELLOW_BACK_BLACK: &str = "\x1b[1;33;40m";
@@ -77,6 +79,8 @@ pub fn get_color_escape(
     };
 
     let final_color = match () {
+        _ if file_type.is_dir() && mode & 0o1002 == 0o1002 => BLACK_BACK_GREEN,
+        _ if file_type.is_dir() && mode & 0o002 != 0 => BLUE_BACK_GREEN,
         _ if file_type.is_dir() && mode & 0o1000 != 0 => BACK_BLUE,
         _ if file_type.is_dir() => BOLD_BLUE,
         _ if file_type.is_symlink() => BOLD_CYAN,
