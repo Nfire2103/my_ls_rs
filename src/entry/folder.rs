@@ -41,7 +41,6 @@ fn load_sub_entries(
             continue;
         }
 
-        // TODO maybe moove this if in display function
         if path.is_dir() && options[RECURSIVE] {
             let folder_result = Folder::new(path_str, options)
                 .map_err(|err| display_error_at_open(path_str, err));
@@ -91,20 +90,20 @@ impl Folder {
 }
 
 impl Entry for Folder {
-    fn display(&self, listing_format: bool) {
-        if listing_format {
+    fn display(&self, is_listing: bool) {
+        if is_listing {
             println!("total {}", get_nbr_blks(&self.entries.files));
         }
         for file in &self.entries.files {
-            file.display(listing_format);
+            file.display(is_listing);
         }
-        if self.entries.files.len() > 0 && !listing_format {
+        if self.entries.files.len() > 0 && !is_listing {
             println!();
         }
 
         for folder in &self.entries.folders {
             println!("\n{}:", format_name(&folder.path_str));
-            folder.display(listing_format);
+            folder.display(is_listing);
         }
     }
 

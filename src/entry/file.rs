@@ -87,8 +87,8 @@ impl File {
 }
 
 impl Entry for File {
-    fn display(&self, listing_format: bool) {
-        if listing_format {
+    fn display(&self, is_listing: bool) {
+        if is_listing {
             self.display_listing();
         } else {
             self.display_simple();

@@ -22,7 +22,7 @@ pub struct Entries {
 }
 
 pub trait Entry {
-    fn display(&self, listing_format: bool);
+    fn display(&self, is_listing: bool);
     fn get_name(&self) -> &String;
     fn get_mtime(&self) -> i64;
 }
