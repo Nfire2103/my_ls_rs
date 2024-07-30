@@ -3,6 +3,18 @@ use std::fs::{read_link, FileType};
 use std::os::unix::fs::FileTypeExt;
 use users::{get_group_by_gid, get_user_by_uid};
 
+const CYAN: &str = "\x1b[36m";
+const BOLD_RED: &str = "\x1b[1;31m";
+const BOLD_GREEN: &str = "\x1b[1;32m";
+const BOLD_BLUE: &str = "\x1b[1;34m";
+const BOLD_MAGENTA: &str = "\x1b[1;35m";
+const BOLD_CYAN: &str = "\x1b[1;36m";
+const BACK_RED: &str = "\x1b[41m";
+const BLACK_BACK_YELLOW: &str = "\x1b[30;43m";
+const YELLOW_BACK_BLACK: &str = "\x1b[33;40m";
+const BOLD_YELLOW_BACK_BLACK: &str = "\x1b[1;33;40m";
+pub const RESET_COLOR: &str = "\x1B[0m";
+
 pub fn get_owner(uid: u32, path_str: &str) -> String {
     let Some(user) = get_user_by_uid(uid) else {
         eprintln!("{}: Failed to get the owner!", path_str);
@@ -49,27 +61,27 @@ pub fn get_color_escape(
 ) -> &'static str {
     let mut ext_color = match get_file_extension(path_str).as_str() {
         "png" | "jpg" | "jpeg" | "webp" | "svg" | "gif" | "mp4" | "ppm"
-        | "bmp" | "tiff" => "\x1b[1;31m",
+        | "bmp" | "tiff" => BOLD_MAGENTA,
         "zip" | "tar" | "tgz" | "gz" | "rar" | "7z" | "jar" | "bz2" | "deb"
-        | "war" => "\x1b[1;35m",
-        "mp3" | "ogg" | "wav" | "flac" | "aac" => "\x1b[36m",
+        | "war" => BOLD_RED,
+        "mp3" | "ogg" | "wav" | "flac" | "aac" => CYAN,
         _ => "",
     };
 
     ext_color = match () {
-        _ if mode & 0o4000 != 0 => "\x1b[41m",
-        _ if mode & 0o2000 != 0 => "\x1b[30;43m",
-        _ if is_exec(mode) => "\x1b[1;32m",
+        _ if mode & 0o4000 != 0 => BACK_RED,
+        _ if mode & 0o2000 != 0 => BLACK_BACK_YELLOW,
+        _ if is_exec(mode) => BOLD_GREEN,
         _ => ext_color,
     };
 
     match () {
-        _ if file_type.is_dir() => "\x1b[1;34m",
-        _ if file_type.is_symlink() => "\x1b[1;36m",
-        _ if file_type.is_fifo() => "\x1b[33;40m",
-        _ if file_type.is_socket() => "\x1b[1;35m",
-        _ if file_type.is_char_device() => "\x1b[1;33;40m",
-        _ if file_type.is_block_device() => "\x1b[1;33;40m",
+        _ if file_type.is_dir() => BOLD_BLUE,
+        _ if file_type.is_symlink() => BOLD_CYAN,
+        _ if file_type.is_fifo() => YELLOW_BACK_BLACK,
+        _ if file_type.is_socket() => BOLD_MAGENTA,
+        _ if file_type.is_char_device() => BOLD_YELLOW_BACK_BLACK,
+        _ if file_type.is_block_device() => BOLD_YELLOW_BACK_BLACK,
         _ => ext_color,
     }
 }

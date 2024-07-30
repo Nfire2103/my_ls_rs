@@ -1,12 +1,10 @@
 use super::format::{format_mode, format_mtime, format_name};
 use super::metadata::{
-    get_color_escape, get_group, get_owner, get_symlink_target,
+    get_color_escape, get_group, get_owner, get_symlink_target, RESET_COLOR,
 };
 use super::Entry;
 use std::fs::symlink_metadata;
 use std::os::unix::fs::MetadataExt;
-
-const RESET_COLOR: &str = "\x1B[0m";
 
 #[derive(Default)]
 pub struct File {
